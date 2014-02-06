@@ -19,6 +19,7 @@
 --
 -- Version: 1.0 (July 7, 2011)
 -- Version: 1.1 (July 22, 2011) - Added Hide button and changed Next button behavior.
+-- Version: 2.0 (January 14, 2013) - Updated with InMobi 4.1.0 SDK. Added Interstitial button behavior.
 --
 -- Sample code is MIT licensed, see http://www.coronalabs.com/links/code/license
 -- Copyright (C) 2013 Corona Labs Inc. All Rights Reserved.
@@ -60,14 +61,14 @@ local bgW, bgH = 320, 480
 local currentAdIndex = 1
 
 local adsTable = {
-	"banner320x48",
+	"banner320x50",
 	"banner300x250",
 }
 if sysModel == "iPad" then
 	-- change settings if on iPad. It has 3 additional adUnitTypes it can show.
 	bgW, bgH = 768, 1024
 	adsTable = {
-		"banner320x48",
+		"banner320x50",
 		"banner300x250",
 		"banner728x90",
 		"banner468x60",
@@ -92,9 +93,33 @@ if appID then
 	local showIndexedBanner = function()
 		print("Showing Banner: " .. adsTable[currentAdIndex])
 		local adX, adY = 0, 0
-		ads.show( adsTable[currentAdIndex], { x=adX, y=adY, interval=5, testMode=true } )
+		ads.show( adsTable[currentAdIndex], {
+            x=adX,
+            y=adY,
+            interval=60,
+            testMode=true,
+            postalCode ='133433',
+            areaCode = '2423232',
+            dob = '12-10-1990',
+            logLevel = 'LOGLEVEL_DEBUG',
+            income = 2900,
+            age = 38,
+            gender = 'GENDER_MALE',
+            education = 'EDUCATION_UNKNOWN',
+            ethnicity = 'ETHNICITY_UNKNOWN',
+            maritalStatus = 'MARITAL_STATUS_UNKNOWN',
+            hasChildren = 'FALSE',
+            sexualOrientation = 'SEXUAL_ORIENTATION_UNKNOWN',
+            language = 'ENG',
+            interests = 'reading,writing,eating'
+        } )
 	end
 
+    -- Show interstitial ad.
+    local showInterstitialAd = function()
+        print("Showing InMobi Interstitial Ad");
+        ads.show("interstitial");
+    end
 
 	-- onRelease event listener for 'nextButton'
 	local onNextButtonReleased = function( event )
@@ -105,12 +130,15 @@ if appID then
 		showIndexedBanner()
 	end
 
-
 	-- onRelease event listener for 'hideButton'
 	local onHideButtonReleased = function( event )
 		ads.hide()
 	end
 
+    -- onRelease event listener for 'showInterstitial'
+    local onInterstitialButtonReleased = function(event)
+        showInterstitialAd();
+    end
 
 	-- if on simulator, make sure onRelease event for buttons are set to nil
 	if sysEnv == "simulator" then
@@ -128,7 +156,7 @@ if appID then
 		onRelease = onNextButtonReleased
 	}
 	nextButton.x = display.contentWidth * 0.5
-	nextButton.y = display.contentHeight - 120
+	nextButton.y = display.contentHeight - 180
 
 
 	-- create a hide button
@@ -140,7 +168,18 @@ if appID then
 		onRelease = onHideButtonReleased
 	}
 	hideButton.x = display.contentWidth * 0.5
-	hideButton.y = display.contentHeight - 60
+	hideButton.y = display.contentHeight - 120
+    
+	-- create a hide button
+	local interstitialButton = widget.newButton
+	{
+		width = 298,
+		height = 56,
+		label = "Show Interstitial",
+		onRelease = onInterstitialButtonReleased
+	}
+	interstitialButton.x = display.contentWidth * 0.5
+	interstitialButton.y = display.contentHeight - 60
 
 
 	-- if on simulator, let user know they must build for device
@@ -165,7 +204,7 @@ if appID then
 		hideButton.alpha = 0
 	else
 		-- display initial banner ad
-		showIndexedBanner()
+        showIndexedBanner()
 	end
 else
 	-- If no appId is set, show a message on the screen
